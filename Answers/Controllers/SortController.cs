@@ -1,47 +1,46 @@
-﻿using System;
+﻿using Answers.Modal;
+using Answers.Services.Service;
+using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Text.Unicode;
 using System.Threading.Tasks;
-using System.Web;
-using Answers.Modal;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Answers.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Produces("application/json")]
     public class SortController : ControllerBase
     {
+        private readonly ISortService _sortService;
+        public SortController(ISortService sortService)
+        {
+            _sortService = sortService;
+        }
         [HttpGet]
-        public string Get(string sortoption)
+        public IActionResult Get(string sortoption)
         {
             try
             {
+                var arr_res = Task.Run(async () => await _sortService.PerformSort(sortoption)).ConfigureAwait(false).GetAwaiter().GetResult(); ;
+
+                //var result = Task.Run(async () => await GetAsync("http://dev-wooliesx-recruitment.azurewebsites.net/api/resource/products?token=eb848457-3d00-454f-9270-4490790cea30")).ConfigureAwait(false).GetAwaiter().GetResult();
+
+                //var arr_res = JsonSerializer.Deserialize<Product[]>(result);
+
+                //var res = Task.Run(async () => await GetSorted(sortoption, arr_res.ToList())).GetAwaiter().GetResult();
+
                
-
-                var result = Task.Run(async () => await GetAsync("http://dev-wooliesx-recruitment.azurewebsites.net/api/resource/products?token=eb848457-3d00-454f-9270-4490790cea30")).ConfigureAwait(false).GetAwaiter().GetResult();
-
-                return result;
-                var arr_res = JsonSerializer.Deserialize<Product[]>(result);
-
-                var res = Task.Run(async () => await GetSorted(sortoption, arr_res.ToList())).GetAwaiter().GetResult();
-
-                res = res.Replace("\"quantity\":0", "\"quantity\":0.0");
-                return res;
-
+                return Ok(arr_res);
             }
             catch (Exception exp)
             {
                 throw exp;
             }
-
-            
         }
 
         public async Task<string> GetAsync(string uri)
@@ -57,78 +56,79 @@ namespace Answers.Controllers
             }
         }
 
-        public async Task<string> GetSorted(string sortOption, List<Product> products)
+        public async Task<List<Product>> GetSorted(string sortOption, List<Product> products)
         {
-           
-
             switch (sortOption)
             {
                 case "Low":
                     return await GetLow(products);
-                    
+
                 case "High":
                     return await GetHigh(products);
-                                        
+
                 case "Ascending":
                     return await GetAscending(products);
-                    
+
                 case "Descending":
                     return await GetDescending(products);
-                    
+
                 case "Recommended":
                     return await GetRecommended(products);
-                    
+
                 default:
                     return await GetLow(products);
             }
         }
 
-        public async Task<string> GetLow(List<Product> products)
+        public async Task<List<Product>> GetLow(List<Product> products)
         {
-            
+            return products.OrderBy(x => x.price).ToList();
+        }
 
-           
-            return JsonSerializer.Serialize(products.OrderBy(x => x.price));
-        }
-        public async Task<string> GetHigh(List<Product> products)
+        public async Task<List<Product>> GetHigh(List<Product> products)
         {
-            return JsonSerializer.Serialize(products.OrderByDescending(x => x.price));
+            return products.OrderByDescending(x => x.price).ToList();
         }
-        public async Task<string> GetAscending(List<Product> products)
+
+        public async Task<List<Product>> GetAscending(List<Product> products)
         {
-            return JsonSerializer.Serialize(products.OrderBy(x => x.name));
+            return products.OrderBy(x => x.name).ToList();
         }
-        public async Task<string> GetDescending(List<Product> products)
+
+        public async Task<List<Product>> GetDescending(List<Product> products)
         {
-            return JsonSerializer.Serialize(products.OrderByDescending(x => x.name));
+            return products.OrderByDescending(x => x.name).ToList();
         }
-        public async Task<string> GetRecommended(List<Product> products)
+
+        public async Task<List<Product>> GetRecommended(List<Product> products)
         {
             List<Product> SortedProducts = new List<Product>();
-            var result =  await GetAsync("http://dev-wooliesx-recruitment.azurewebsites.net/api/resource/shopperHistory?token=eb848457-3d00-454f-9270-4490790cea30");
+            var result = await GetAsync("http://dev-wooliesx-recruitment.azurewebsites.net/api/resource/shopperHistory?token=eb848457-3d00-454f-9270-4490790cea30");
             var arr_res = JsonSerializer.Deserialize<ShoppingHistory[]>(result);
 
-            var res = await GetCustomerProductsFromShoppingHistory(23, arr_res.ToList());
+            var res = await GetCustomerProductsFromShoppingHistory(arr_res.ToList());
 
-            var grp = res.GroupBy(x => x).ToDictionary(group => group.Key, group => group.ToList().Count);
+            //  var grp = res.GroupBy(x => x).ToDictionary(group => group.Key, group => group.ToList().Count);
 
-            var grp2 = grp.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
+            var grp2 = res.OrderByDescending(x => x.Value).Select(x => x.Key).ToList();
 
             grp2.ForEach(x => SortedProducts.Add(products.First(z => z.name == x)));
 
-            return JsonSerializer.Serialize(SortedProducts); 
+            SortedProducts.AddRange(products.Except(SortedProducts));
+
+            return SortedProducts.ToList();
         }
 
-        async Task<List<string>> GetCustomerProductsFromShoppingHistory(int custId, List<ShoppingHistory> shoppingHistory)
+       
+
+        private async Task<List<KeyValuePair<string, double>>> GetCustomerProductsFromShoppingHistory(List<ShoppingHistory> shoppingHistory)
         {
-            //shoppingHistory.Where(x => x.customerId == custId).SelectMany(y => y.products.Select(z => z.name).Distinct().ToList());
-            return shoppingHistory.Where(c => c.customerId == custId).SelectMany(x => x.products?.Select(z => z.name)).ToList();
+            var names = shoppingHistory.SelectMany(x => x.products?.Select(z => new { z.name, z.quantity })).ToList();
+
+            return names
+                .GroupBy(x => x.name)
+                .Select(g => new KeyValuePair<string, double>(g.Key, g.Sum(x => x.quantity)))
+                .ToList();
         }
-
-     
-
-
-
-
     }
 }
