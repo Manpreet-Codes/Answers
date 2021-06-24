@@ -4,6 +4,6 @@ namespace Answers.Services.Interfaces
 {
     public interface IHttpClientServiceGet
     {
-        Task<string> GetRequest(string Url);    
+        Task<string> GetRequest(string Url);
     }
 }

@@ -6,7 +6,8 @@ namespace Answers.Services.Implementations
 {
     public class HttpDataService : IHttpDataService
     {
-        IHttpClientServiceGet _httpClientServiceGet;
+        private IHttpClientServiceGet _httpClientServiceGet;
+
         public HttpDataService(IHttpClientServiceGet httpClientServiceGet,
             IHttpClientServicePost httpClientServicePost)
         {

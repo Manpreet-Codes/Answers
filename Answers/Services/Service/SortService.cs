@@ -1,23 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Answers.Modal;
+﻿using Answers.Modal;
 using Answers.Services.Interfaces.ProductSorting;
 using Answers.Services.Interfaces.ShoppingProcessors;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Answers.Services.Service
 {
     public class SortService : ISortService
     {
         private readonly IProductProcessor _productProcessor;
-        private readonly IProductSortingServiceLowPrice       _productSortingServiceLowPrice;
-        private readonly IProductSortingServiceHighPrice      _productSortingServiceHighPrice;
-        private readonly IProductSortingServiceNameAscending  _productSortingServiceNameAscending;
+        private readonly IProductSortingServiceLowPrice _productSortingServiceLowPrice;
+        private readonly IProductSortingServiceHighPrice _productSortingServiceHighPrice;
+        private readonly IProductSortingServiceNameAscending _productSortingServiceNameAscending;
         private readonly IProductSortingServiceNameDescending _productSortingServiceNameDescending;
         private readonly IProductSortingServiceNameRecommeded _productSortingServiceNameRecommeded;
 
-        
         public SortService(IProductProcessor productProcessor, IProductSortingServiceLowPrice productSortingServiceLowPrice,
             IProductSortingServiceHighPrice productSortingServiceHighPrice, IProductSortingServiceNameAscending productSortingServiceNameAscending,
             IProductSortingServiceNameDescending productSortingServiceNameDescending, IProductSortingServiceNameRecommeded productSortingServiceNameRecommeded)
@@ -29,9 +27,9 @@ namespace Answers.Services.Service
             _productSortingServiceNameDescending = productSortingServiceNameDescending;
             _productSortingServiceNameRecommeded = productSortingServiceNameRecommeded;
         }
+
         public async Task<List<Product>> PerformSort(string SortType)
         {
-
             List<Product> products = await _productProcessor.ProcessProducts();
 
             if (SortType.Equals("low", StringComparison.InvariantCultureIgnoreCase))
@@ -56,7 +54,6 @@ namespace Answers.Services.Service
             }
 
             return null;
-           
         }
     }
 }
