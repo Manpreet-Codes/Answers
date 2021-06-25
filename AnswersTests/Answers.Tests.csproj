@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
@@ -17,6 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Answers.BusinessLogic\Answers.BusinessLogic.csproj" />
+    <ProjectReference Include="..\Answers.DataLayer\Answers.DataLayer.csproj" />
     <ProjectReference Include="..\Answers\Answers.csproj" />
   </ItemGroup>
 

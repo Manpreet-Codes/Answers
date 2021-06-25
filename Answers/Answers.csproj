@@ -5,6 +5,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Model\**" />
+    <Compile Remove="Services\**" />
+    <Content Remove="Model\**" />
+    <Content Remove="Services\**" />
+    <EmbeddedResource Remove="Model\**" />
+    <EmbeddedResource Remove="Services\**" />
+    <None Remove="Model\**" />
+    <None Remove="Services\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Autofac" Version="6.2.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="Microsoft.AspNet.WebPages" Version="3.2.7" />
@@ -16,6 +27,11 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Answers.BusinessLogic\Answers.BusinessLogic.csproj" />
+    <ProjectReference Include="..\Answers.DataLayer\Answers.DataLayer.csproj" />
   </ItemGroup>
 
 </Project>

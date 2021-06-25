@@ -15,7 +15,7 @@ namespace Answers.Controllers
         }
 
         [HttpGet]
-        public ActionResult Get()
+        public IActionResult Get()
         {
             return _userService.AuthenticateUser();
         }
